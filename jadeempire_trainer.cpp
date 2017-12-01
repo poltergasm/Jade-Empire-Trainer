@@ -10,8 +10,6 @@ void exit_with_error(char *err, HANDLE *hProcess)
 	exit(1);
 }
 
-using namespace std;
-
 DWORD findDmaAddy(int PointerLevel, HANDLE hProcHandle, DWORD Offsets[], DWORD BaseAddress)
 { 
     DWORD pointer = BaseAddress; 
