@@ -48,7 +48,7 @@ DWORD_PTR getModuleBaseAddress(DWORD dwProcID, TCHAR *szModuleName)
 }
 
 #pragma comment(lib, "user32.lib")
-int main()
+int main(int argc, char* argv[])
 {
 	HWND dWin = FindWindow(0, _T(winStr));
 	HANDLE hProcess;
@@ -67,11 +67,14 @@ int main()
 	int canWrite;
 	float focus;
 	float chi;
-	int stylePoints;
+	unsigned int stylePoints;
+	unsigned int align;
 
 	float addFocus = 2000.00;
 	float addChi   = 2000.00;
-	int addPoints = 1000;
+	unsigned int addPoints = 1000;
+	unsigned int alignGood = 250;
+	unsigned int alignBad  = 0;
 
 	BaseAddr = getModuleBaseAddress(pid, (TCHAR*)exeStr);
 	BaseAddr = (BaseAddr+0x36C924);
@@ -79,10 +82,12 @@ int main()
 	DWORD focusAddr;
 	DWORD chiAddr;
 	DWORD pointsAddr;
+	DWORD alignAddr;
 
 	focusAddr = findDmaAddy(5, hProcess, focusOffsets, BaseAddr);
 	chiAddr   = findDmaAddy(5, hProcess, chiOffsets, BaseAddr);
 	pointsAddr = findDmaAddy(5, hProcess, pointsOffsets, BaseAddr);
+	alignAddr  = findDmaAddy(5, hProcess, alignOffsets, BaseAddr);
 
 	canRead = ReadProcessMemory(hProcess, (LPCVOID)pointsAddr, &stylePoints, sizeof(stylePoints), NULL);
 	if (!canRead)
@@ -92,7 +97,25 @@ int main()
 		canWrite = WriteProcessMemory(hProcess, (void*)pointsAddr, &addPoints, sizeof(addPoints), NULL);
 		if (!canWrite)
 			exit_with_error(ERROR_MEMORY_WRITE, &hProcess);
-		cout << "Added 1,000 style points. Enjoy\n";
+		cout << ">> Added 1,000 style points. Enjoy\n";
+	}
+
+	if (argc > 1) {
+		if (strcmp(argv[1], "good") == 0) {
+			canWrite = WriteProcessMemory(hProcess, (void*)alignAddr, &alignGood, sizeof(alignGood), NULL);
+			if (!canWrite)
+				exit_with_error("Failed setting alignment. Memory error", &hProcess);
+
+			cout << ">> Changed alignment to open palm\n";
+		}
+
+		if (strcmp(argv[1], "bad") == 0) {
+			canWrite = WriteProcessMemory(hProcess, (void*)alignAddr, &alignBad, sizeof(alignGood), NULL);
+			if (!canWrite)
+				exit_with_error("Failed setting alignment. Memory error", &hProcess);
+
+			cout << ">> Changed alignment to closed fist\n";
+		}
 	}
 
 	while(1) {

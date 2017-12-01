@@ -3,6 +3,7 @@
 Open the trainer once you're in a game. Provides the following features:
 
 - Adds 1,000 style points on startup
+- Run game with optional parameters (good/bad) to change your alignment
 - Infinite chi
 - Infinite focus
 
