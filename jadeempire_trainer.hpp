@@ -13,6 +13,7 @@ const char *exeStr = "JadeEmpire.exe";
 // offsets
 DWORD focusOffsets[] = {0xA0, 0x0, 0x0, 0x68, 0x48C};
 DWORD chiOffsets[]   = {0xA0, 0x0, 0x0, 0x528, 0x478};
+DWORD pointsOffsets[] = {0xA0, 0x0, 0x0, 0x68, 0x83C};
 
 // function prototypes
 void exit_with_error(char *err, HANDLE *hProcess);

@@ -67,16 +67,33 @@ int main()
 	int canWrite;
 	float focus;
 	float chi;
+	int stylePoints;
+
 	float addFocus = 2000.00;
 	float addChi   = 2000.00;
-	
+	int addPoints = 1000;
+
 	BaseAddr = getModuleBaseAddress(pid, (TCHAR*)exeStr);
 	BaseAddr = (BaseAddr+0x36C924);
 
 	DWORD focusAddr;
 	DWORD chiAddr;
+	DWORD pointsAddr;
+
 	focusAddr = findDmaAddy(5, hProcess, focusOffsets, BaseAddr);
 	chiAddr   = findDmaAddy(5, hProcess, chiOffsets, BaseAddr);
+	pointsAddr = findDmaAddy(5, hProcess, pointsOffsets, BaseAddr);
+
+	canRead = ReadProcessMemory(hProcess, (LPCVOID)pointsAddr, &stylePoints, sizeof(stylePoints), NULL);
+	if (!canRead)
+		exit_with_error(ERROR_MEMORY_READ, &hProcess);
+
+	if (stylePoints < 1000) {
+		canWrite = WriteProcessMemory(hProcess, (void*)pointsAddr, &addPoints, sizeof(addPoints), NULL);
+		if (!canWrite)
+			exit_with_error(ERROR_MEMORY_WRITE, &hProcess);
+		cout << "Added 1,000 style points. Enjoy\n";
+	}
 
 	while(1) {
 		canRead = ReadProcessMemory(hProcess, (LPCVOID)focusAddr, &focus, sizeof(focus), NULL);
