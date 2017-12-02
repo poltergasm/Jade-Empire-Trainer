@@ -89,6 +89,34 @@ int main(int argc, char* argv[])
 	pointsAddr = findDmaAddy(5, hProcess, pointsOffsets, BaseAddr);
 	alignAddr  = findDmaAddy(5, hProcess, alignOffsets, BaseAddr);
 
+	// config settings
+	BOOL skipAlignMod = false;
+	TCHAR szResult[10];
+	unsigned int alignModifier;
+	int readC = GetPrivateProfileString(
+		_T("Settings"),
+		_T("Alignment"),
+		_T("Neutral"),
+		szResult,
+		10,
+		_T(".\\config.ini")
+	);
+
+	if (strcmp(szResult, "Neutral") == 0) alignModifier = 127;
+	if (strcmp(szResult, "Bad") == 0) alignModifier = alignBad;
+	if (strcmp(szResult, "Good") == 0) alignModifier = alignGood;
+	if (strcmp(szResult, "None") == 0) skipAlignMod = true;
+
+	if (!skipAlignMod) {
+		canWrite = WriteProcessMemory(hProcess, (void*)alignAddr, &alignModifier, sizeof(alignModifier), NULL);
+		if (!canWrite)
+			exit_with_error("Failed setting alignment. Memory error", &hProcess);
+
+		cout << ">> Changed alignment to " << szResult << " (" << alignModifier << ")\n";
+	} else {
+		cout << ">> Leaving your alignment alone\n";
+	}
+
 	canRead = ReadProcessMemory(hProcess, (LPCVOID)pointsAddr, &stylePoints, sizeof(stylePoints), NULL);
 	if (!canRead)
 		exit_with_error(ERROR_MEMORY_READ, &hProcess);
@@ -98,24 +126,6 @@ int main(int argc, char* argv[])
 		if (!canWrite)
 			exit_with_error(ERROR_MEMORY_WRITE, &hProcess);
 		cout << ">> Added 1,000 style points. Enjoy\n";
-	}
-
-	if (argc > 1) {
-		if (strcmp(argv[1], "good") == 0) {
-			canWrite = WriteProcessMemory(hProcess, (void*)alignAddr, &alignGood, sizeof(alignGood), NULL);
-			if (!canWrite)
-				exit_with_error("Failed setting alignment. Memory error", &hProcess);
-
-			cout << ">> Changed alignment to open palm\n";
-		}
-
-		if (strcmp(argv[1], "bad") == 0) {
-			canWrite = WriteProcessMemory(hProcess, (void*)alignAddr, &alignBad, sizeof(alignGood), NULL);
-			if (!canWrite)
-				exit_with_error("Failed setting alignment. Memory error", &hProcess);
-
-			cout << ">> Changed alignment to closed fist\n";
-		}
 	}
 
 	while(1) {
