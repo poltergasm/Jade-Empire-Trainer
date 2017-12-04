@@ -144,6 +144,12 @@ int main(int argc, char* argv[])
 			exit_with_error(ERROR_MEMORY_READ, &hProcess);
 
 		if (chi < 120.00) {
+			// sometimes during loading screens things can go wrong...
+			if (chi == 0) {
+				cout << ">> Redefining chi. You must have hit a loading screen\n";
+				chiAddr = findDmaAddy(5, hProcess, chiOffsets, BaseAddr);
+			}
+
 			canWrite = WriteProcessMemory(hProcess, (void*)chiAddr, &addChi, sizeof(addChi), NULL);
 			if (!canWrite)
 				exit_with_error(ERROR_MEMORY_WRITE, &hProcess);
